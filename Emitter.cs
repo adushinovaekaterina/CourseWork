@@ -11,15 +11,17 @@ namespace Курсовая_работа
     // каждая из которых будет вести себя по-разному,
     // а рисовать можно будет все разом
     public class Emitter
-    {
-        public float GravitationX = 0;
-        public float GravitationY = 1; // пусть гравитация будет силой один пиксель за такт
-
+    {     
         List<Particle> particles = new List<Particle>(); // список для хранения частиц
 
         // переменные для хранения положения мыши
         public int MousePositionX;
         public int MousePositionY;
+
+        public List<IImpactPoint> impactPoints = new List<IImpactPoint>(); // список для хранения точек притяжения и отторжения
+
+        public float GravitationX = 0;
+        public float GravitationY = 0; // гравитация отключена // (если = 1) пусть гравитация будет силой один пиксель за такт
 
         // метод для обновления состояния системы
         public void UpdateState()
@@ -49,6 +51,12 @@ namespace Курсовая_работа
                 }
                 else
                 {
+                    // каждая точка по-своему воздействует на вектор скорости
+                    foreach (IImpactPoint point in impactPoints)
+                    {
+                        point.ImpactParticle(particle); // так как вся логика в точках, то тут нужно только метод вызывать
+                    }
+
                     // гравитация воздействует на вектор скорости, поэтому пересчитываем его
                     particle.SpeedX += GravitationX;
                     particle.SpeedY += GravitationY;
@@ -86,6 +94,12 @@ namespace Курсовая_работа
             foreach (var particle in particles)
             {
                 particle.Draw(g);
+            }
+
+            // рисуем точки притяжения красными кружочками
+            foreach (var point in impactPoints)
+            {
+                point.Render(g);
             }
         }
     }
