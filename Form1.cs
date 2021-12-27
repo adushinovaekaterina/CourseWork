@@ -19,18 +19,6 @@ namespace Курсовая_работа
 
             // привяжем изображение, для того чтобы рисовать на нем
             picDisplay.Image = new Bitmap(picDisplay.Width, picDisplay.Height);
-
-            // генерируем 500 частиц
-            for (var i = 0; i < 500; ++i)
-            {
-                Particle particle = new Particle();
-
-                // переносим частицы в центр изображения
-                particle.X = picDisplay.Image.Width / 2;
-                particle.Y = picDisplay.Image.Height / 2;
-
-                particles.Add(particle); // добавляем список
-            }
         }
 
         // метод для обновления состояния системы
@@ -46,9 +34,9 @@ namespace Курсовая_работа
                     // восстанавливаем здоровье
                     particle.Life = 20 + Particle.rand.Next(100);
 
-                    // перемещаем частицу в центр
-                    particle.X = picDisplay.Image.Width / 2;
-                    particle.Y = picDisplay.Image.Height / 2;
+                    // новое начальное расположение частицы — это то, куда указывает курсор
+                    particle.X = MousePositionX;
+                    particle.Y = MousePositionY;
 
                     // делаю рандомное направление, скорость и размер
                     particle.Direction = Particle.rand.Next(360);
@@ -63,6 +51,24 @@ namespace Курсовая_работа
                     particle.Y -= (float)(particle.Speed * Math.Sin(directionInRadians));
                 }
             }
+
+            // генерация частиц, не более 10 штук за тик
+            for (int i = 0; i < 10; ++i)
+            {
+                if (particles.Count < 500) // пока частиц меньше 500 
+                {
+                    ParticleColorful particle = new ParticleColorful(); // генерируем новые
+                    particle.FromColor = Color.Yellow;
+                    particle.ToColor = Color.FromArgb(0, Color.Magenta);
+                    particle.X = MousePositionX;
+                    particle.Y = MousePositionY;
+                    particles.Add(particle);
+                }
+                else
+                {
+                    break; // иначе ничего не генерируем
+                }
+            }
         }
 
         // метод для рендеринга
@@ -75,18 +81,30 @@ namespace Курсовая_работа
             }
         }
 
-        // метод для обработки тика таймера
+        // метод, который будет вызываться по таймеру
         private void timer1_Tick(object sender, EventArgs e)
         {
             UpdateState(); // каждый тик обновляем систему
 
             using (Graphics g = Graphics.FromImage(picDisplay.Image))
             {
-                g.Clear(Color.White); // очистка изображения от предыдущих данных
+                g.Clear(Color.Black); // очистка изображения от предыдущих данных
                 Render(g); // рендерим систему
             }
 
             picDisplay.Invalidate(); // обновляем picDisplay
+        }
+
+        // переменные для хранения положения мыши
+        private int MousePositionX = 0;
+        private int MousePositionY = 0;
+        
+        // обработчик события фиксирования положения мыши
+        private void picDisplay_MouseMove(object sender, MouseEventArgs e)
+        {
+            // заносим положение мыши в переменные для хранения положения мыши
+            MousePositionX = e.X;
+            MousePositionY = e.Y;
         }
     }
 }
