@@ -15,6 +15,9 @@ namespace Курсовая_работа
         public Form1()
         {
             InitializeComponent();
+
+            // привяжем изображение, для того чтобы рисовать на нем
+            picDisplay.Image = new Bitmap(picDisplay.Width, picDisplay.Height); 
         }
     }
 }
