@@ -7,11 +7,23 @@ using System.Threading.Tasks;
 
 namespace Курсовая_работа
 {
+    // эмиттер - источник возникновения частиц
+
     // класс для создания нескольких систем частиц,
     // каждая из которых будет вести себя по-разному,
     // а рисовать можно будет все разом
     public class Emitter
     {
+        public List<Particle> particles = new List<Particle>(); // список для хранения частиц
+        public List<IImpactPoint> impactPoints = new List<IImpactPoint>();
+
+        // переменные для хранения положения мыши
+        public int MousePositionX;
+        public int MousePositionY;
+
+        public float GravitationX = 0;
+        public float GravitationY = 1; // гравитация будет силой один пиксель за такт
+
         public int X; // координата X центра эмиттера, будем ее использовать вместо MousePositionX
         public int Y; // соответствующая координата Y 
         public int Direction = 0; // вектор направления в градусах, куда сыпет эмиттер
@@ -26,18 +38,34 @@ namespace Курсовая_работа
         public int ParticlesPerTick = 1; // поле, в котором можно будет указать количество частиц в такт
 
         public Color ColorFrom = Color.White; // начальный цвет частицы
-        public Color ColorTo = Color.FromArgb(0, Color.Black); // конечный цвет частиц
+        public Color ColorTo = Color.FromArgb(0, Color.Black); // конечный цвет частицы
 
-        List<Particle> particles = new List<Particle>(); // список для хранения частиц
+        // метод для сброса частицы, можно переопределять
+        public virtual void ResetParticle(Particle particle)
+        {
+            // восстанавливаем здоровье
+            particle.Life = Particle.rand.Next(LifeMin, LifeMax);
 
-        // переменные для хранения положения мыши
-        public int MousePositionX;
-        public int MousePositionY;
+            // новое начальное расположение частицы — это то, куда указывает курсор
+            particle.X = X;
+            particle.Y = Y;
 
-        public List<IImpactPoint> impactPoints = new List<IImpactPoint>(); // список для хранения точек притяжения и отторжения
+            // сброс состояния частицы
+            double direction = Direction + (double)Particle.rand.Next(Spreading) - Spreading / 2;
 
-        public float GravitationX = 0;
-        public float GravitationY = 1; // гравитация отключена // (если = 1) пусть гравитация будет силой один пиксель за такт
+            if (particle is ParticleColorful)
+            {
+                (particle as ParticleColorful).FromColor = ColorFrom;
+                (particle as ParticleColorful).ToColor = ColorTo;
+            }
+
+            int speed = Particle.rand.Next(SpeedMin, SpeedMax);
+
+            particle.SpeedX = (float)(Math.Cos(direction / 180 * Math.PI) * speed);
+            particle.SpeedY = -(float)(Math.Sin(direction / 180 * Math.PI) * speed);
+
+            particle.Radius = Particle.rand.Next(RadiusMin, RadiusMax);
+        }
 
         // метод для генерации частицы, который можно переопределить
         public virtual Particle CreateParticle()
@@ -75,11 +103,10 @@ namespace Курсовая_работа
                     particle.Y += particle.SpeedY;
 
                     particle.Life -= 1; // уменьшаем здоровье
-
                     // каждая точка по-своему воздействует на вектор скорости
                     foreach (IImpactPoint point in impactPoints)
                     {
-                        point.ImpactParticle(particle); // так как вся логика в точках, то тут нужно только метод вызывать
+                        point.ImpactParticle(particle);
                     }
 
                     // гравитация воздействует на вектор скорости, поэтому пересчитываем его
@@ -96,32 +123,8 @@ namespace Курсовая_работа
                 Particle particle = CreateParticle(); // вызываем метод для генерации частицы
                 ResetParticle(particle); // // вызов метода для сброса частицы 
                 particles.Add(particle);
-
             }
         }
-
-        public int ParticlesCount = 500;
-
-        // метод для сброса частицы, можно переопределять
-        public virtual void ResetParticle(Particle particle)
-        {
-            // восстанавливаем здоровье
-            particle.Life = Particle.rand.Next(LifeMin, LifeMax);
-
-            // новое начальное расположение частицы — это то, куда указывает курсор
-            particle.X = X;
-            particle.Y = Y;
-
-            // сброс состояния частицы
-            double direction = Direction + (double)Particle.rand.Next(Spreading) - Spreading / 2;
-            int speed = Particle.rand.Next(SpeedMin, SpeedMax);
-
-            particle.SpeedX = (float)(Math.Cos(direction / 180 * Math.PI) * speed);
-            particle.SpeedY = -(float)(Math.Sin(direction / 180 * Math.PI) * speed);
-
-            particle.Radius = Particle.rand.Next(RadiusMin, RadiusMax);
-        }
-
 
         // метод для рендеринга
         public void Render(Graphics g)
@@ -132,11 +135,10 @@ namespace Курсовая_работа
                 particle.Draw(g);
             }
 
-            // рисуем точки притяжения красными кружочками
-            foreach (var point in impactPoints)
-            {
-                point.Render(g);
-            }
+            //foreach (var point in impactPoints.ToList())
+            //{
+            //    point.Render(g);
+            //}
         }
     }
     // эмиттер, который будет генерировать частицы, падающими сверху

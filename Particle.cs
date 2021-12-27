@@ -45,7 +45,7 @@ namespace Курсовая_работа
             int alpha = (int)(k * 255);
 
             // создаем цвет из уже существующего, но привязываем к нему еще и значение альфа канала
-            var color = Color.FromArgb(alpha, Color.Black);
+            Color color = Color.FromArgb(alpha, Color.Black);
 
             SolidBrush b = new SolidBrush(color); // создаем кисть для рисования
 
@@ -79,8 +79,8 @@ namespace Курсовая_работа
             float k = Math.Min(1f, Life / 100);
 
             // так как k уменьшается от 1 до 0, то порядок цветов обратный
-            var color = MixColor(ToColor, FromColor, k);
-            var b = new SolidBrush(color);
+            Color color = MixColor(ToColor, FromColor, k);
+            SolidBrush b = new SolidBrush(color);
 
             // нарисуем залитый кружок радиусом Radius с центром в X, Y
             g.FillEllipse(b, X - Radius, Y - Radius, Radius * 2, Radius * 2);
