@@ -69,6 +69,13 @@ namespace Курсовая_работа
                 }
                 else
                 {
+                    // пересчет положения частицы в пространстве, 
+                    // теперь храним вектор скорости в явном виде и его не надо пересчитывать
+                    particle.X += particle.SpeedX;
+                    particle.Y += particle.SpeedY;
+
+                    particle.Life -= 1; // уменьшаем здоровье
+
                     // каждая точка по-своему воздействует на вектор скорости
                     foreach (IImpactPoint point in impactPoints)
                     {
@@ -77,12 +84,7 @@ namespace Курсовая_работа
 
                     // гравитация воздействует на вектор скорости, поэтому пересчитываем его
                     particle.SpeedX += GravitationX;
-                    particle.SpeedY += GravitationY;
-
-                    // пересчет положения частицы в пространстве, 
-                    // теперь храним вектор скорости в явном виде и его не надо пересчитывать
-                    particle.X += particle.SpeedX;
-                    particle.Y += particle.SpeedY;
+                    particle.SpeedY += GravitationY;                    
                 }
             }
 

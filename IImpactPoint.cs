@@ -10,7 +10,7 @@ namespace Курсовая_работа
     public abstract class IImpactPoint
     {
         // координаты точки
-        public float X; 
+        public float X;
         public float Y;
 
         // абстрактный метод с помощью которого будем изменять состояние частиц,
@@ -18,7 +18,7 @@ namespace Курсовая_работа
         public abstract void ImpactParticle(Particle particle);
 
         // базовый метод для отрисовки точки
-        public void Render(Graphics g)
+        public virtual void Render(Graphics g)
         {
             g.FillEllipse(
                     new SolidBrush(Color.Red),
@@ -48,6 +48,19 @@ namespace Курсовая_работа
             particle.SpeedX += gX * Power / r2;
             particle.SpeedY += gY * Power / r2;
         }
+
+        // переопределенный метод для отрисовки точки
+        public override void Render(Graphics g)
+        {
+            // рисуем окружность с диаметром, равным Power
+            g.DrawEllipse(
+                   new Pen(Color.Red),
+                   X - Power / 2,
+                   Y - Power / 2,
+                   Power,
+                   Power
+               );
+        }
     }
 
     // точка антигравитации (вместо притяжения будет отталкивать частицы)
@@ -61,12 +74,19 @@ namespace Курсовая_работа
             float gX = X - particle.X;
             float gY = Y - particle.Y;
 
-            // считаем квадрат расстояния между частицей и точкой r^2
-            float r2 = (float)Math.Max(100, gX * gX + gY * gY);
+            // считаем расстояние от центра точки до центра частицы
+            double r = Math.Sqrt(gX * gX + gY * gY);
 
-            // пересчитываем вектор скорости с учетом отторжения от точки
-            particle.SpeedX -= gX * Power / r2; // минусы вместо плюсов
-            particle.SpeedY -= gY * Power / r2; // и тут
+            if (r + particle.Radius < Power / 2) // если частица оказалось внутри окружности
+            {
+                // считаем квадрат расстояния между частицей и точкой r^2
+                // то притягиваем ее
+                float r2 = (float)Math.Max(100, gX * gX + gY * gY);
+
+                // пересчитываем вектор скорости с учетом отторжения от точки
+                particle.SpeedX -= gX * Power / r2; // минусы вместо плюсов
+                particle.SpeedY -= gY * Power / r2; // и тут
+            }
         }
     }
 }
