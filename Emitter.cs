@@ -11,7 +11,23 @@ namespace Курсовая_работа
     // каждая из которых будет вести себя по-разному,
     // а рисовать можно будет все разом
     public class Emitter
-    {     
+    {
+        public int X; // координата X центра эмиттера, будем ее использовать вместо MousePositionX
+        public int Y; // соответствующая координата Y 
+        public int Direction = 0; // вектор направления в градусах, куда сыпет эмиттер
+        public int Spreading = 360; // разброс частиц относительно Direction
+        public int SpeedMin = 1; // начальная минимальная скорость движения частицы
+        public int SpeedMax = 10; // начальная максимальная скорость движения частицы
+        public int RadiusMin = 2; // минимальный радиус частицы
+        public int RadiusMax = 10; // максимальный радиус частицы
+        public int LifeMin = 20; // минимальное время жизни частицы
+        public int LifeMax = 100; // максимальное время жизни частицы
+
+        public int ParticlesPerTick = 1; // поле, в котором можно будет указать количество частиц в такт
+
+        public Color ColorFrom = Color.White; // начальный цвет частицы
+        public Color ColorTo = Color.FromArgb(0, Color.Black); // конечный цвет частиц
+
         List<Particle> particles = new List<Particle>(); // список для хранения частиц
 
         // переменные для хранения положения мыши
@@ -21,19 +37,35 @@ namespace Курсовая_работа
         public List<IImpactPoint> impactPoints = new List<IImpactPoint>(); // список для хранения точек притяжения и отторжения
 
         public float GravitationX = 0;
-        public float GravitationY = 0; // гравитация отключена // (если = 1) пусть гравитация будет силой один пиксель за такт
+        public float GravitationY = 1; // гравитация отключена // (если = 1) пусть гравитация будет силой один пиксель за такт
+
+        // метод для генерации частицы, который можно переопределить
+        public virtual Particle CreateParticle()
+        {
+            ParticleColorful particle = new ParticleColorful(); // генерируем новые частицы
+            particle.FromColor = ColorFrom;
+            particle.ToColor = ColorTo;
+
+            return particle;
+        }
 
         // метод для обновления состояния системы
         public void UpdateState()
         {
+            int particlesToCreate = ParticlesPerTick; // фиксируем счетчик сколько частиц нам создавать за тик
+
             foreach (Particle particle in particles)
             {
-                particle.Life -= 1; // уменьшаем здоровье
-
-                // если здоровье кончилось
-                if (particle.Life < 0)
+                // если частица умерла
+                if (particle.Life <= 0)
                 {
-                    ResetParticle(particle); // вызов метода для сброса частицы 
+                    // то проверяем надо ли создать частицу
+                    if (particlesToCreate > 0)
+                    {
+                        // сброс частицы равносилен созданию частицы,
+                        particlesToCreate -= 1; // поэтому уменьшаем счётчик созданных частиц на 1
+                        ResetParticle(particle); // вызов метода для сброса частицы 
+                    }
                 }
                 else
                 {
@@ -54,21 +86,15 @@ namespace Курсовая_работа
                 }
             }
 
-            // генерация частиц, не более 10 штук за тик
-            for (int i = 0; i < 10; ++i)
+            // цикл будет срабатывать только в самом начале работы эмиттера,
+            // пока не накопится критическая масса частиц
+            while (particlesToCreate >= 1)
             {
-                if (particles.Count < ParticlesCount) // пока частиц меньше 500 
-                {
-                    ParticleColorful particle = new ParticleColorful(); // генерируем новые
-                    particle.FromColor = Color.White;
-                    particle.ToColor = Color.FromArgb(0, Color.Black);
-                    ResetParticle(particle); // // вызов метода для сброса частицы 
-                    particles.Add(particle);
-                }
-                else
-                {
-                    break; // иначе ничего не генерируем
-                }
+                particlesToCreate -= 1;
+                Particle particle = CreateParticle(); // вызываем метод для генерации частицы
+                ResetParticle(particle); // // вызов метода для сброса частицы 
+                particles.Add(particle);
+
             }
         }
 
@@ -78,20 +104,20 @@ namespace Курсовая_работа
         public virtual void ResetParticle(Particle particle)
         {
             // восстанавливаем здоровье
-            particle.Life = 20 + Particle.rand.Next(100);
+            particle.Life = Particle.rand.Next(LifeMin, LifeMax);
 
             // новое начальное расположение частицы — это то, куда указывает курсор
-            particle.X = MousePositionX;
-            particle.Y = MousePositionY;
+            particle.X = X;
+            particle.Y = Y;
 
             // сброс состояния частицы
-            var direction = (double)Particle.rand.Next(360);
-            var speed = 1 + Particle.rand.Next(10);
+            double direction = Direction + (double)Particle.rand.Next(Spreading) - Spreading / 2;
+            int speed = Particle.rand.Next(SpeedMin, SpeedMax);
 
             particle.SpeedX = (float)(Math.Cos(direction / 180 * Math.PI) * speed);
             particle.SpeedY = -(float)(Math.Sin(direction / 180 * Math.PI) * speed);
 
-            particle.Radius = 2 + Particle.rand.Next(10);
+            particle.Radius = Particle.rand.Next(RadiusMin, RadiusMax);
         }
 
 

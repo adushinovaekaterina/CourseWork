@@ -12,7 +12,8 @@ namespace Курсовая_работа
 {
     public partial class Form1 : Form
     {
-        Emitter emitter; // эмиттер
+        List<Emitter> emitters = new List<Emitter>();
+        Emitter emitter; // поле для эмиттера
         public Form1()
         {
             InitializeComponent();
@@ -20,33 +21,42 @@ namespace Курсовая_работа
             // привяжем изображение, для того чтобы рисовать на нем
             picDisplay.Image = new Bitmap(picDisplay.Width, picDisplay.Height);
 
-            // вручную создаем
-            emitter = new TopEmitter
+            // создаем эмиттер и привязываем его к полю emitter
+            this.emitter = new Emitter
             {
-                Width = picDisplay.Width,
-                GravitationY = 0.25f
+                Direction = 0, // вектор направления в градусах, куда сыпет эмиттер
+                Spreading = 10, // разброс частиц относительно Direction
+                SpeedMin = 10, // начальная минимальная скорость движения частицы
+                SpeedMax = 10, // начальная максимальная скорость движения частицы
+                ColorFrom = Color.Gold, 
+                ColorTo = Color.FromArgb(0, Color.Red),
+                ParticlesPerTick = 10,
+                X = picDisplay.Width / 2,
+                Y = picDisplay.Height / 2,
             };
 
-            // гравитон
-            emitter.impactPoints.Add(new GravityPoint
-            {
-                X = (float)(picDisplay.Width * 0.25),
-                Y = picDisplay.Height / 2
-            });
+            emitters.Add(this.emitter); // добавляем в список emitters, чтобы эмиттер рендерился и обновлялся
 
-            // в центре антигравитон
-            emitter.impactPoints.Add(new AntiGravityPoint
-            {
-                X = picDisplay.Width / 2,
-                Y = picDisplay.Height / 2
-            });
+            //// гравитон
+            //emitter.impactPoints.Add(new GravityPoint
+            //{
+            //    X = (float)(picDisplay.Width * 0.25),
+            //    Y = picDisplay.Height / 2
+            //});
 
-            // снова гравитон
-            emitter.impactPoints.Add(new GravityPoint
-            {
-                X = (float)(picDisplay.Width * 0.75),
-                Y = picDisplay.Height / 2
-            });
+            //// в центре антигравитон
+            //emitter.impactPoints.Add(new AntiGravityPoint
+            //{
+            //    X = picDisplay.Width / 2,
+            //    Y = picDisplay.Height / 2
+            //});
+
+            //// снова гравитон
+            //emitter.impactPoints.Add(new GravityPoint
+            //{
+            //    X = (float)(picDisplay.Width * 0.75),
+            //    Y = picDisplay.Height / 2
+            //});
         }
 
         // метод, который будет вызываться по таймеру
@@ -68,6 +78,17 @@ namespace Курсовая_работа
             // в эмиттер передаем положение мышки
             emitter.MousePositionX = e.X;
             emitter.MousePositionY = e.Y;
+        }
+
+        private void tbDirection_Scroll(object sender, EventArgs e)
+        {
+            emitter.Direction = tbDirection.Value; // направлению эмиттера присваиваем значение ползунка 
+            lblDirection.Text = $"{tbDirection.Value}°"; // вывод значения
+        }
+        private void tbSpreading_Scroll(object sender, EventArgs e)
+        {
+            emitter.Spreading = tbSpreading.Value; // направлению эмиттера присваиваем значение ползунка 
+            lblSpreading.Text = $"{tbSpreading.Value}°"; // вывод значения
         }
     }
 }
