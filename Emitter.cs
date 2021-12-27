@@ -57,7 +57,7 @@ namespace Курсовая_работа
             // генерация частиц, не более 10 штук за тик
             for (int i = 0; i < 10; ++i)
             {
-                if (particles.Count < 500) // пока частиц меньше 500 
+                if (particles.Count < ParticlesCount) // пока частиц меньше 500 
                 {
                     ParticleColorful particle = new ParticleColorful(); // генерируем новые
                     particle.FromColor = Color.White;
@@ -71,6 +71,8 @@ namespace Курсовая_работа
                 }
             }
         }
+
+        public int ParticlesCount = 500;
 
         // метод для сброса частицы, можно переопределять
         public virtual void ResetParticle(Particle particle)
