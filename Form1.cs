@@ -12,13 +12,20 @@ namespace Курсовая_работа
 {
     public partial class Form1 : Form
     {
-        Emitter emitter = new Emitter(); // эмиттер
+        Emitter emitter; // эмиттер
         public Form1()
         {
             InitializeComponent();
 
             // привяжем изображение, для того чтобы рисовать на нем
             picDisplay.Image = new Bitmap(picDisplay.Width, picDisplay.Height);
+
+            // вручную создаем
+            emitter = new TopEmitter
+            {
+                Width = picDisplay.Width,
+                GravitationY = 0.25f
+            };
 
             // гравитон
             emitter.impactPoints.Add(new GravityPoint
